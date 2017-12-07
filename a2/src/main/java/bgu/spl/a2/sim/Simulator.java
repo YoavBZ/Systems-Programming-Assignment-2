@@ -4,7 +4,6 @@
  * and open the template in the editor.
  */
 package bgu.spl.a2.sim;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import bgu.spl.a2.ActorThreadPool;
