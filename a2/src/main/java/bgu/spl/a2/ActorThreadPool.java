@@ -1,7 +1,8 @@
 package bgu.spl.a2;
 
+import javafx.util.Pair;
+
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * represents an actor thread pool - to understand what this class does please
@@ -16,7 +17,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class ActorThreadPool {
 
 	private VersionMonitor versionMonitor;
-	private HashMap<String, ConcurrentLinkedQueue<Action>> actorsQueue;
+	private HashMap<String, Pair<PrivateState, ActorQueue<Action>>> actorsMap;
+	private Thread[] threads;
 
 	/**
 	 * creates a {@link ActorThreadPool} which has nthreads. Note, threads
@@ -31,7 +33,29 @@ public class ActorThreadPool {
 	 */
 	public ActorThreadPool(int nthreads) {
 		versionMonitor = new VersionMonitor();
-		actorsQueue = new HashMap<>();
+		actorsMap = new HashMap<>();
+		threads = new Thread[nthreads];
+		for (int i = 0; i < nthreads; i++) {
+			threads[i] = new Thread(() -> {
+				try {
+					int version = versionMonitor.getVersion();
+					for (Pair<PrivateState, ActorQueue<Action>> actorPair : actorsMap.values()) {
+						ActorQueue<Action> queue = actorPair.getValue();
+						if (queue.getLock().tryLock()) {
+							try {
+								if (!queue.isEmpty()) {
+									queue.remove().handle(this, queue.getActorId(), actorPair.getKey());
+								}
+							} finally {
+								queue.getLock().unlock();
+							}
+						}
+					}
+					versionMonitor.await(version);
+				} catch (InterruptedException ignored) {
+				}
+			});
+		}
 	}
 
 	/**
@@ -43,7 +67,13 @@ public class ActorThreadPool {
 	 * @param actorState actor's private state (actor's information)
 	 */
 	public void submit(Action<?> action, String actorId, PrivateState actorState) {
-		actorsQueue.get(actorId).add(action);
+		Pair<PrivateState, ActorQueue<Action>> queuePair = actorsMap.get(actorId);
+		if (queuePair == null) {
+			queuePair = new Pair<>(actorState, new ActorQueue<Action>(actorId));
+			actorsMap.put(actorId, queuePair);
+		}
+		queuePair.getValue().add(action);
+		versionMonitor.inc();
 	}
 
 	/**
@@ -56,14 +86,16 @@ public class ActorThreadPool {
 	 * @throws InterruptedException if the thread that shut down the threads is interrupted
 	 */
 	public void shutdown() throws InterruptedException {
-
+		for (Thread thread : threads)
+			thread.join();
 	}
 
 	/**
 	 * start the threads belongs to this thread pool
 	 */
 	public void start() {
-
+		for (Thread thread : threads)
+			thread.start();
 	}
 
 }

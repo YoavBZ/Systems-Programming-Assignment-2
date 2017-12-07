@@ -1,6 +1,8 @@
 package bgu.spl.a2;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * an abstract class that represents an action that may be executed using the
@@ -15,8 +17,11 @@ import java.util.Collection;
  */
 public abstract class Action<R> {
 
-	Promise<R> promise;
-	boolean shouldContinue;
+	private String name;
+	private Promise<R> promise;
+	private boolean alreadyStarted;
+	private List<Action> requiredActions;
+	private AtomicInteger finishedActions = new AtomicInteger(0);
 
 	/**
 	 * start handling the action - note that this method is protected, a thread
