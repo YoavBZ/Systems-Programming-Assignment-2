@@ -1,5 +1,6 @@
 package bgu.spl.a2;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,15 +18,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class Action<R> {
 
-	private String name;
-	private Promise<R> promise;
-	private boolean alreadyStarted;
-	private List<Action> requiredActions;
-	private AtomicInteger finishedActions = new AtomicInteger(0);
+	protected String actorId;
+	protected ActorThreadPool threadPool;
+	protected PrivateState state;
+	private String actionName;
+	private AtomicInteger completedActions = new AtomicInteger(0);
+	private Promise<R> promise = new Promise<>();
+	private boolean alreadyStarted = false;
+	protected List<Action<?>> requiredActions = new ArrayList<>();
+	protected callback continuation;
 
 	/**
 	 * start handling the action - note that this method is protected, a thread
 	 * cannot call it directly.
+	 *
+	 * This method will define the continuation callback
 	 */
 	protected abstract void start();
 
@@ -41,8 +48,23 @@ public abstract class Action<R> {
 	 */
 	/*package*/
 	final void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
+		System.out.println("#### " + actionName + ": handle()");
+		threadPool = pool;
+		state = actorState;
+		this.actorId=actorId;
+		if (!alreadyStarted) {
+			alreadyStarted = true;
+			start();
+			then(requiredActions, () -> {
+				if (completedActions.incrementAndGet() == requiredActions.size())
+					threadPool.submit(this, actorId, actorState);
+			});
+		} else {
+			// All required action have been executed
+			System.out.println("Initiate continuation of " + actionName + " in " + actorId);
+			continuation.call();
+		}
 	}
-
 
 	/**
 	 * add a callback to be executed once *all* the given actions results are
@@ -51,13 +73,14 @@ public abstract class Action<R> {
 	 * Implementors note: make sure that the callback is running only once when
 	 * all the given actions completed.
 	 *
-	 * @param actions
+	 * @param actions  required actions
 	 * @param callback the callback to execute once all the results are resolved
 	 */
 	protected final void then(Collection<? extends Action<?>> actions, callback callback) {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
-
+		System.out.println("#### " + actionName + ": then()");
+		for (Action action : actions) {
+			action.promise.subscribe(callback);
+		}
 	}
 
 	/**
@@ -67,16 +90,16 @@ public abstract class Action<R> {
 	 * @param result - the action calculated result
 	 */
 	protected final void complete(R result) {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		System.out.println("#### " + actionName + ": complete()");
+		promise.resolve(result);
+		state.addRecord(getActionName());
 	}
 
 	/**
 	 * @return action's promise (result)
 	 */
 	public final Promise<R> getResult() {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		return promise;
 	}
 
 	/**
@@ -88,25 +111,24 @@ public abstract class Action<R> {
 	 * @return promise that will hold the result of the sent action
 	 */
 	public Promise<?> sendMessage(Action<?> action, String actorId, PrivateState actorState) {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		System.out.println("#### " + actionName + ": sendMessage()");
+		threadPool.submit(action, actorId, actorState);
+		return action.getResult();
 	}
 
 	/**
 	 * set action's name
 	 *
-	 * @param actionName
+	 * @param actionName action's name
 	 */
 	public void setActionName(String actionName) {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		this.actionName = actionName;
 	}
 
 	/**
 	 * @return action's name
 	 */
 	public String getActionName() {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		return actionName;
 	}
 }

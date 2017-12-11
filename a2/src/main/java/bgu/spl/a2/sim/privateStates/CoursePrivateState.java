@@ -1,31 +1,38 @@
 package bgu.spl.a2.sim.privateStates;
 
-import java.util.List;
-
 import bgu.spl.a2.PrivateState;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * this class describe course's private state
  */
-public class CoursePrivateState extends PrivateState{
+public class CoursePrivateState extends PrivateState {
 
 	private Integer availableSpots;
 	private Integer registered;
 	private List<String> regStudents;
 	private List<String> prequisites;
-	
+
 	/**
- 	 * Implementors note: you may not add other constructors to this class nor
+	 * Implementors note: you may not add other constructors to this class nor
 	 * you allowed to add any other parameter to this constructor - changing
 	 * this may cause automatic tests to fail..
 	 */
 	public CoursePrivateState() {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		registered = 0;
+		availableSpots = 0;
+		regStudents = new ArrayList<>();
+		prequisites = new ArrayList<>();
 	}
 
 	public Integer getAvailableSpots() {
 		return availableSpots;
+	}
+
+	public void setAvailableSpots(Integer availableSpots) {
+		this.availableSpots = availableSpots;
 	}
 
 	public Integer getRegistered() {
@@ -38,5 +45,29 @@ public class CoursePrivateState extends PrivateState{
 
 	public List<String> getPrequisites() {
 		return prequisites;
+	}
+
+	public void setPrequisites(List<String> prequisites) {
+		this.prequisites = prequisites;
+	}
+
+	public void incRegistered() {
+		registered++;
+	}
+
+	public void incAvaolable() {
+		availableSpots++;
+	}
+
+	public void decAvailable() {
+		availableSpots--;
+	}
+
+	public void decRegistered() {
+		registered--;
+	}
+
+	public void setRegistered(int registered) {
+		this.registered = registered;
 	}
 }

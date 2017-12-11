@@ -23,10 +23,12 @@ public class Promise<T> {
 	private List<callback> callbackList = new ArrayList<>();
 
 	/**
-	 * @return the resolved result if such exists (i.e., if this object has been
-	 * {@link #resolve(java.lang.Object)}ed
-	 * @throws IllegalStateException in the case where this method is called and this object is
-	 *                               not yet resolved
+	 *
+	 * @return the resolved value if such exists (i.e., if this object has been
+	 *         {@link #resolve(java.lang.Object)}ed
+	 * @throws IllegalStateException
+	 *             in the case where this method is called and this object is
+	 *             not yet resolved
 	 */
 	public T get() throws IllegalStateException {
 		if (!isResolved())
