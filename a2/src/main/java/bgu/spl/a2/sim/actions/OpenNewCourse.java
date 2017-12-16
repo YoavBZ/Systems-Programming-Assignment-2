@@ -4,6 +4,7 @@ import bgu.spl.a2.Action;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
 
+import java.util.Collections;
 import java.util.List;
 
 public class OpenNewCourse extends Action<Boolean> {
@@ -25,15 +26,15 @@ public class OpenNewCourse extends Action<Boolean> {
 		if (!courses.contains(courseName)) {
 			System.out.println("Creating course " + courseName);
 			Action<Boolean> initCourse = new InitCourse(courseName, availableSpots, prequisites);
-			requiredActions.add(initCourse);
+			List<Action<?>> requiredActions = Collections.singletonList(initCourse);
 			sendMessage(initCourse, courseName, new CoursePrivateState());
-			continuation = () -> {
+			then(requiredActions, () -> {
 				courses.add(courseName);
 				complete(true);
-			};
+			});
 		} else {
 			System.out.println("Course " + courseName + " has already been created");
-			continuation = () -> complete(false);
+			then(Collections.emptyList(), () -> complete(false));
 		}
 	}
 }

@@ -15,6 +15,5 @@ public class OpenPlaceInCourse extends Action<Boolean> {
 	protected void start() {
 		((CoursePrivateState) state).setAvailableSpots(((CoursePrivateState) state).getAvailableSpots() + spaceToAdd);
 		complete(true);
-
 	}
 }

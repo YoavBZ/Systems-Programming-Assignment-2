@@ -24,14 +24,12 @@ public abstract class Action<R> {
 	private String actionName;
 	private AtomicInteger completedActions = new AtomicInteger(0);
 	private Promise<R> promise = new Promise<>();
-	private boolean alreadyStarted = false;
-	protected List<Action<?>> requiredActions = new ArrayList<>();
 	protected callback continuation;
 
 	/**
 	 * start handling the action - note that this method is protected, a thread
 	 * cannot call it directly.
-	 *
+	 * <p>
 	 * This method will define the continuation callback
 	 */
 	protected abstract void start();
@@ -51,14 +49,9 @@ public abstract class Action<R> {
 		System.out.println("#### " + actionName + ": handle()");
 		threadPool = pool;
 		state = actorState;
-		this.actorId=actorId;
-		if (!alreadyStarted) {
-			alreadyStarted = true;
+		this.actorId = actorId;
+		if (continuation == null) {
 			start();
-			then(requiredActions, () -> {
-				if (completedActions.incrementAndGet() == requiredActions.size())
-					threadPool.submit(this, actorId, actorState);
-			});
 		} else {
 			// All required action have been executed
 			System.out.println("Initiate continuation of " + actionName + " in " + actorId);
@@ -78,9 +71,15 @@ public abstract class Action<R> {
 	 */
 	protected final void then(Collection<? extends Action<?>> actions, callback callback) {
 		System.out.println("#### " + actionName + ": then()");
+		continuation = callback;
 		for (Action action : actions) {
-			action.promise.subscribe(callback);
+			action.promise.subscribe(() -> {
+				if (completedActions.incrementAndGet() == actions.size()) {
+					threadPool.submit(this, actorId, state);
+				}
+			});
 		}
+
 	}
 
 	/**
