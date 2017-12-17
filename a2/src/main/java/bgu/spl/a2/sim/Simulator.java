@@ -16,7 +16,6 @@ import bgu.spl.a2.PrivateState;
  */
 public class Simulator {
 
-
 	public static ActorThreadPool actorThreadPool;
 
 	/**

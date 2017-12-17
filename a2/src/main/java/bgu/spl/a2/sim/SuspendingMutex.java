@@ -2,8 +2,10 @@ package bgu.spl.a2.sim;
 
 import bgu.spl.a2.Promise;
 
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * this class is related to {@link Computer}
@@ -15,8 +17,8 @@ import java.util.concurrent.locks.Lock;
 public class SuspendingMutex {
 
 	private Lock lock;
-	private ConcurrentLinkedQueue<Promise<Computer>> queue;
-	private Computer computer;
+	private Queue<Promise<Computer>> queue;
+	public Computer computer;
 
 	/**
 	 * Constructor
@@ -25,21 +27,26 @@ public class SuspendingMutex {
 	 */
 	public SuspendingMutex(Computer computer) {
 		this.computer = computer;
+		lock = new ReentrantLock();
+		queue = new ConcurrentLinkedQueue<>();
 	}
 
 	/**
 	 * Computer acquisition procedure
-	 * Note that this procedure is non-blocking and should return immediatly
+	 * Note that this procedure is non-blocking and should return immediately
 	 *
 	 * @return a promise for the requested computer
 	 */
 	public Promise<Computer> down() {
-		Promise<Computer> promise = new Promise<>();
+		Promise<Computer> newPromise = new Promise<>();
 		if (lock.tryLock()) {
-			return null;
+			for (Promise<Computer> promise : queue)
+				promise.resolve(this.computer);
+			queue.clear();
+			newPromise.resolve(this.computer);
 		} else
-			queue.add(promise);
-		return promise;
+			queue.add(newPromise);
+		return newPromise;
 	}
 
 	/**
@@ -47,9 +54,6 @@ public class SuspendingMutex {
 	 * releases a computer which becomes available in the warehouse upon completion
 	 */
 	public void up() {
-		for (Promise<Computer> promise : queue)
-			promise.resolve(this.computer);
-		queue.clear();
 		lock.unlock();
 	}
 }

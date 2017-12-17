@@ -5,12 +5,14 @@ import java.util.Map;
 
 public class Computer {
 
-	String computerType;
+	public String computerType;
 	long failSig;
 	long successSig;
+	SuspendingMutex suspendingMutex;
 
 	public Computer(String computerType) {
 		this.computerType = computerType;
+		suspendingMutex= new SuspendingMutex(this);
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package bgu.spl.a2.sim;
 
+import java.util.List;
+
 /**
  * represents a warehouse that holds a finite amount of computers
  * and their suspended mutexes.
@@ -7,12 +9,11 @@ package bgu.spl.a2.sim;
  */
 public class Warehouse {
 
-	private SuspendingMutex[] suspendingMutexes;
+	public List<SuspendingMutex> suspendingMutexes;
 
 	public Warehouse(Computer[] computers) {
-		suspendingMutexes = new SuspendingMutex[computers.length];
-		for (int i = 0; i < computers.length; i++) {
-			suspendingMutexes[i] = new SuspendingMutex(computers[i]);
+		for (Computer computer : computers) {
+			suspendingMutexes.add(computer.suspendingMutex);
 		}
 	}
 }

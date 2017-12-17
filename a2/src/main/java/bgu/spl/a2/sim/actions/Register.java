@@ -4,10 +4,7 @@ import bgu.spl.a2.Action;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Register extends Action<Boolean> {
 
@@ -28,12 +25,12 @@ public class Register extends Action<Boolean> {
 			complete(false);
 		} else {
 			List<String> prequisites = ((CoursePrivateState) state).getPrequisites();
-			Action<Set<String>> getCourses = new GetStudentCourses();
+			Action<HashMap<String, Integer>> getCourses = new GetStudentGrades();
 			List<Action<?>> requiredActions = new ArrayList<>();
 			requiredActions.add(getCourses);
 			sendMessage(getCourses, studentName, new StudentPrivateState());
 			then(requiredActions, () -> {
-				Set<String> result = getCourses.getResult().get();
+				Set<String> result = getCourses.getResult().get().keySet();
 				if (result.containsAll(prequisites)) {
 					System.out.println("Registered " + studentName + " successfully");
 					Action<Boolean> addToGradeSheet = new AddToGradeSheet(actorId, studentGrade);

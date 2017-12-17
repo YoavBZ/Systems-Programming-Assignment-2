@@ -62,6 +62,7 @@ public class ActorThreadPool {
 						versionMonitor.await(version);
 					} catch (InterruptedException e) {
 						System.out.println("Thread " + index + " interrupted");
+						break;
 					}
 				}
 			});
@@ -70,19 +71,21 @@ public class ActorThreadPool {
 
 	/**
 	 * getter for actors
+	 *
 	 * @return actors
 	 */
-	public Map<String, PrivateState> getActors(){
+	public Map<String, PrivateState> getActors() {
 		// TODO: replace method body with real implementation
 		throw new UnsupportedOperationException("Not Implemented Yet.");
 	}
 
 	/**
 	 * getter for actor's private state
+	 *
 	 * @param actorId actor's id
 	 * @return actor's private state
 	 */
-	public PrivateState getPrivaetState(String actorId){
+	public PrivateState getPrivateState(String actorId){
 		// TODO: replace method body with real implementation
 		throw new UnsupportedOperationException("Not Implemented Yet.");
 	}

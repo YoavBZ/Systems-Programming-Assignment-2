@@ -23,12 +23,10 @@ public class Promise<T> {
 	private List<callback> callbackList = new ArrayList<>();
 
 	/**
-	 *
 	 * @return the resolved value if such exists (i.e., if this object has been
-	 *         {@link #resolve(java.lang.Object)}ed
-	 * @throws IllegalStateException
-	 *             in the case where this method is called and this object is
-	 *             not yet resolved
+	 * {@link #resolve(java.lang.Object)}ed
+	 * @throws IllegalStateException in the case where this method is called and this object is
+	 *                               not yet resolved
 	 */
 	public T get() throws IllegalStateException {
 		if (!isResolved())
@@ -52,7 +50,7 @@ public class Promise<T> {
 	 * Any callbacks that were registered to be notified when this object is
 	 * resolved via the {@link #subscribe(callback)} method should
 	 * be executed before this method returns
-	 *
+	 * <p>
 	 * synchronized since it can be in the middle of a subscription
 	 *
 	 * @param value - the result to resolve this promise object with
@@ -78,7 +76,7 @@ public class Promise<T> {
 	 * than once, in addition, in order to avoid memory leaks - once the
 	 * callback got called, this object should not hold its reference any
 	 * longer.
-	 *
+	 * <p>
 	 * synchronized since it can be in the middle of a resolving
 	 *
 	 * @param callback the callback to be called when the promise object is resolved

@@ -1,8 +1,6 @@
 package bgu.spl.a2;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -44,8 +42,7 @@ public abstract class Action<R> {
 	 * the same package can access it - you should *not* change it to
 	 * public/private/protected
 	 */
-	/*package*/
-	final void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
+	/*package*/	final void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
 		System.out.println("#### " + actionName + ": handle()");
 		threadPool = pool;
 		state = actorState;

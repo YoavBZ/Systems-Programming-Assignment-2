@@ -6,10 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 @RunWith(Parameterized.class)
@@ -101,9 +98,9 @@ public class ActionTest {
 		protected void start() {
 			System.out.println("#### " + getActionName() + ": start()");
 			Action<Boolean> confAction = new Confirmation(amount, sender, receiver, receiverBank, new BankState());
-			requiredActions.add(confAction);
+			List<Action<?>> requiredActions = Collections.singletonList(confAction);
 			sendMessage(confAction, receiverBank, new BankState());
-			continuation = () -> {
+			then(requiredActions, () -> {
 				Boolean result = (Boolean) requiredActions.get(0).getResult().get();
 				if (result) {
 					System.out.println("Transaction Succeeded");
@@ -114,7 +111,7 @@ public class ActionTest {
 					System.out.println("Transaction Failed");
 					complete("Transaction Failed");
 				}
-			};
+			});
 		}
 	}
 
