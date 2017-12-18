@@ -37,7 +37,7 @@ public class SuspendingMutex {
 	 *
 	 * @return a promise for the requested computer
 	 */
-	public Promise<Computer> down() {
+	public synchronized Promise<Computer> down() {
 		Promise<Computer> newPromise = new Promise<>();
 		if (lock.tryLock()) {
 			newPromise.resolve(this.computer);
@@ -50,7 +50,7 @@ public class SuspendingMutex {
 	 * Computer return procedure
 	 * releases a computer which becomes available in the warehouse upon completion
 	 */
-	public void up() {
+	public synchronized void up() {
 		if (!queue.isEmpty())
 			queue.remove().resolve(this.computer);
 		else
