@@ -6,12 +6,12 @@ import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
 import java.util.*;
 
-public class Register extends Action<Boolean> {
+public class ParticipateInCourse extends Action<Boolean> {
 
 	private String studentName;
 	private int studentGrade;
 
-	public Register(String studentName, String studentGrade) {
+	public ParticipateInCourse(String studentName, String studentGrade) {
 		this.studentName = studentName;
 		this.studentGrade = studentGrade.equals("-") ? -1 : Integer.valueOf(studentGrade);
 	}
@@ -31,19 +31,17 @@ public class Register extends Action<Boolean> {
 			sendMessage(getCourses, studentName, new StudentPrivateState());
 			then(requiredActions, () -> {
 				Set<String> result = getCourses.getResult().get().keySet();
-				if (result.containsAll(prequisites)) {
+				if (((CoursePrivateState) state).getAvailableSpots() > 0 && result.containsAll(prequisites)) {
 					System.out.println("Registered " + studentName + " successfully");
+					((CoursePrivateState) state).incRegistered();
+					((CoursePrivateState) state).decAvailable();
+					regStudents.add(studentName);
 					Action<Boolean> addToGradeSheet = new AddToGradeSheet(actorId, studentGrade);
 					requiredActions.add(addToGradeSheet);
 					sendMessage(addToGradeSheet, studentName, new StudentPrivateState()).subscribe(() -> threadPool.submit(this, actorId, state));
-					then(Collections.emptyList(), () -> {
-						regStudents.add(studentName);
-						((CoursePrivateState) state).incRegistered();
-						((CoursePrivateState) state).decAvailable();
-						complete(true);
-					});
+					then(Collections.singleton(addToGradeSheet), () -> complete(true));
 				} else {
-					System.out.println("Registered " + studentName + " successfully");
+					System.out.println("Registered " + studentName + " unsuccessfully");
 					complete(false);
 				}
 			});

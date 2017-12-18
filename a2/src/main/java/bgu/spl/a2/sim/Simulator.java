@@ -5,11 +5,21 @@
  */
 package bgu.spl.a2.sim;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.HashMap;
-
+import bgu.spl.a2.Action;
 import bgu.spl.a2.ActorThreadPool;
 import bgu.spl.a2.PrivateState;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * A class describing the simulator for part 2 of the assignment
@@ -17,13 +27,27 @@ import bgu.spl.a2.PrivateState;
 public class Simulator {
 
 	public static ActorThreadPool actorThreadPool;
+	private static File jsonFile;
+	private static JsonObject jsonObject;
 
 	/**
 	 * Begin the simulation Should not be called before attachActorThreadPool()
 	 */
 	public static void start() {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		// TODO: Wait between phases
+		// Phase 1
+		submitActionsList(jsonObject.get("Phase1").getAsJsonArray());
+		// Phase 2
+		submitActionsList(jsonObject.get("Phase2").getAsJsonArray());
+		// Phase 3
+		submitActionsList(jsonObject.get("Phase3").getAsJsonArray());
+	}
+
+	private static void submitActionsList(JsonArray array) {
+		for (JsonElement element : array){
+			JsonObject jsonObject = element.getAsJsonObject();
+			// TODO: Create new action and submit
+		}
 	}
 
 	/**
@@ -32,8 +56,7 @@ public class Simulator {
 	 * @param myActorThreadPool - the ActorThreadPool which will be used by the simulator
 	 */
 	public static void attachActorThreadPool(ActorThreadPool myActorThreadPool) {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		actorThreadPool = myActorThreadPool;
 	}
 
 	/**
@@ -41,13 +64,29 @@ public class Simulator {
 	 * returns list of private states
 	 */
 	public static HashMap<String, PrivateState> end() {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		try {
+			actorThreadPool.shutdown();
+		} catch (InterruptedException e) {
+		}
+		return (HashMap<String, PrivateState>) actorThreadPool.getActors();
 	}
 
-
 	public static int main(String[] args) {
-		//TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		jsonFile = new File(args[0]);
+		JsonParser parser = new JsonParser();
+		try {
+			JsonElement element = parser.parse(new FileReader(jsonFile));
+			jsonObject = element.getAsJsonObject();
+			attachActorThreadPool(new ActorThreadPool(jsonObject.get("threads").getAsInt()));
+			start();
+			HashMap<String, PrivateState> SimulationResult;
+			SimulationResult = end();
+			FileOutputStream fout = new FileOutputStream("result.ser");
+			ObjectOutputStream oos = new ObjectOutputStream(fout);
+			oos.writeObject(SimulationResult);
+		} catch (Exception e) {
+			return 1;
+		}
+		return 0;
 	}
 }

@@ -40,9 +40,6 @@ public class SuspendingMutex {
 	public Promise<Computer> down() {
 		Promise<Computer> newPromise = new Promise<>();
 		if (lock.tryLock()) {
-			for (Promise<Computer> promise : queue)
-				promise.resolve(this.computer);
-			queue.clear();
 			newPromise.resolve(this.computer);
 		} else
 			queue.add(newPromise);
@@ -54,6 +51,9 @@ public class SuspendingMutex {
 	 * releases a computer which becomes available in the warehouse upon completion
 	 */
 	public void up() {
-		lock.unlock();
+		if (!queue.isEmpty())
+			queue.remove().resolve(this.computer);
+		else
+			lock.unlock();
 	}
 }

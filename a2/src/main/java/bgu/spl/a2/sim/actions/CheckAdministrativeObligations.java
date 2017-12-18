@@ -39,15 +39,20 @@ public class CheckAdministrativeObligations extends Action<Boolean> {
 				if (suspendingMutex.computer.computerType.equals(computerType)) {
 					Promise<Computer> computerPromise = suspendingMutex.down();
 					computerPromise.subscribe(() -> {
-						for (int i = 0; i < requiredActions.size(); i++) {
-							Action<HashMap<String, Integer>> action = requiredActions.get(i);
-							HashMap<String, Integer> coursesGrades = action.getResult().get();
-							long sig = computerPromise.get().checkAndSign(conditions, coursesGrades);
-							Action<?> updateSignature = new UpdateSignature(students.get(i), sig);
-							sendMessage(updateSignature, students.get(i), new StudentPrivateState());
-							// TODO: call then() for completion?
+						try {
+							List<Action<?>> updateSignatures = new ArrayList<>();
+							for (int i = 0; i < requiredActions.size(); i++) {
+								Action<HashMap<String, Integer>> action = requiredActions.get(i);
+								HashMap<String, Integer> coursesGrades = action.getResult().get();
+								long sig = computerPromise.get().checkAndSign(conditions, coursesGrades);
+								Action<?> updateSignature = new UpdateSignature(students.get(i), sig);
+								updateSignatures.add(updateSignature);
+								sendMessage(updateSignature, students.get(i), new StudentPrivateState());
+							}
+							then(updateSignatures, () -> complete(true));
+						} finally {
+							suspendingMutex.up();
 						}
-						suspendingMutex.up();
 					});
 				}
 			}

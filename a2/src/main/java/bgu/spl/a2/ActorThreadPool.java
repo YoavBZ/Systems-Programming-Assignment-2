@@ -2,6 +2,7 @@ package bgu.spl.a2;
 
 import javafx.util.Pair;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -75,8 +76,11 @@ public class ActorThreadPool {
 	 * @return actors
 	 */
 	public Map<String, PrivateState> getActors() {
-		// TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+		Map<String, PrivateState> actors = new HashMap<>();
+		for (Map.Entry<String, Pair<PrivateState, ActorQueue<Action>>> actor : actorsMap.entrySet()) {
+			actors.put(actor.getKey(), actor.getValue().getKey());
+		}
+		return actors;
 	}
 
 	/**
@@ -85,9 +89,12 @@ public class ActorThreadPool {
 	 * @param actorId actor's id
 	 * @return actor's private state
 	 */
-	public PrivateState getPrivateState(String actorId){
-		// TODO: replace method body with real implementation
-		throw new UnsupportedOperationException("Not Implemented Yet.");
+	public PrivateState getPrivateState(String actorId) {
+		try {
+			return actorsMap.get(actorId).getKey();
+		} catch (NullPointerException e) {
+			return null;
+		}
 	}
 
 
