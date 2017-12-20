@@ -8,11 +8,9 @@ public class Computer {
 	public String computerType;
 	long failSig;
 	long successSig;
-	SuspendingMutex suspendingMutex;
 
 	public Computer(String computerType) {
 		this.computerType = computerType;
-		suspendingMutex= new SuspendingMutex(this);
 	}
 
 	/**

@@ -12,12 +12,14 @@ public class CloseCourse extends Action<Boolean> {
 	private String courseName;
 
 	public CloseCourse(String courseName) {
+		setActionName("Close Course");
 		this.courseName = courseName;
 	}
 
 	@Override
 	protected void start() {
 		System.out.println("#### " + getActionName() + ": start()");
+
 		List<String> courseList = ((DepartmentPrivateState) state).getCourseList();
 		if (courseList.contains(courseName)) {
 			Action<Boolean> unregisterAll = new UnregisterAll();

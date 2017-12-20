@@ -45,6 +45,7 @@ public class ActorThreadPool {
 						int version = versionMonitor.getVersion();
 						for (Pair<PrivateState, ActorQueue<Action>> actorPair : actorsMap.values()) {
 							ActorQueue<Action> queue = actorPair.getValue();
+							boolean didAction = false;
 							if (queue.getLock().tryLock()) {
 								System.out.println("Thread " + index + " locked queue " + queue.getActorId());
 								try {
@@ -52,10 +53,13 @@ public class ActorThreadPool {
 										Action action = queue.remove();
 										System.out.println("Thread " + index + " started working on " + action.getActionName());
 										action.handle(this, queue.getActorId(), actorPair.getKey());
+										didAction = true;
 									}
 								} finally {
 									System.out.println("Thread " + index + " unlocked queue " + queue.getActorId());
 									queue.getLock().unlock();
+									if (didAction)
+										versionMonitor.inc();
 								}
 							}
 						}

@@ -12,12 +12,14 @@ public class Unregister extends Action<Boolean> {
 	private String studentName;
 
 	public Unregister(String studentName) {
+		setActionName("Unregister");
 		this.studentName = studentName;
 	}
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + getActionName() + ": start()");
+		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
+		state.addRecord(getActionName());
 		List<String> registered = ((CoursePrivateState) state).getRegStudents();
 		if (registered.contains(studentName)) {
 			Action<Boolean> removeFromGradeSheet = new RemoveFromGradeSheet(actorId);

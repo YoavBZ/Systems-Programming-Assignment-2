@@ -12,6 +12,7 @@ public class InitCourse extends Action<Boolean> {
 	private List<String> prequisites;
 
 	public InitCourse(String courseName, int availableSpots, List<String> prequisites) {
+		setActionName(getClass().getName());
 		this.courseName = courseName;
 		this.availableSpots = availableSpots;
 		this.prequisites = prequisites;
@@ -19,7 +20,8 @@ public class InitCourse extends Action<Boolean> {
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + getActionName() + ": start()");
+		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
+		state.addRecord(getActionName());
 		((CoursePrivateState) state).setAvailableSpots(availableSpots);
 		((CoursePrivateState) state).setPrequisites(prequisites);
 		// Add course to department action

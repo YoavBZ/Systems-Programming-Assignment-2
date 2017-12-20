@@ -10,12 +10,14 @@ public class AddNewStudent extends Action<Boolean> {
 	private String studentName;
 
 	public AddNewStudent(String studentName) {
+		setActionName("Add Student");
 		this.studentName = studentName;
 	}
 
 	@Override
 	protected void start() {
 		System.out.println("#### " + getActionName() + ": start()");
+		state.addRecord(getActionName());
 		List<String> students = ((DepartmentPrivateState) state).getStudentList();
 		if (!students.contains(studentName)) {
 			System.out.println("Added student " + studentName);

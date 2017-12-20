@@ -1,6 +1,8 @@
 package bgu.spl.a2.sim;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * represents a warehouse that holds a finite amount of computers
@@ -9,11 +11,12 @@ import java.util.List;
  */
 public class Warehouse {
 
-	public List<SuspendingMutex> suspendingMutexes;
+	public Map<String, SuspendingMutex> computers;
 
 	public Warehouse(Computer[] computers) {
+		this.computers = new HashMap<>();
 		for (Computer computer : computers) {
-			suspendingMutexes.add(computer.suspendingMutex);
+			this.computers.put(computer.computerType, new SuspendingMutex(computer));
 		}
 	}
 }

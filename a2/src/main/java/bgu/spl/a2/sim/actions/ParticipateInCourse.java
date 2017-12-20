@@ -12,13 +12,15 @@ public class ParticipateInCourse extends Action<Boolean> {
 	private int studentGrade;
 
 	public ParticipateInCourse(String studentName, String studentGrade) {
+		setActionName("Participate In Course");
 		this.studentName = studentName;
 		this.studentGrade = studentGrade.equals("-") ? -1 : Integer.valueOf(studentGrade);
 	}
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + getActionName() + ": start()");
+		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
+		state.addRecord(getActionName());
 		List<String> regStudents = ((CoursePrivateState) state).getRegStudents();
 		if (regStudents.contains(studentName) || ((CoursePrivateState) state).getAvailableSpots() == 0) {
 			System.out.println("Student " + studentName + " is already registered, or there's no place");

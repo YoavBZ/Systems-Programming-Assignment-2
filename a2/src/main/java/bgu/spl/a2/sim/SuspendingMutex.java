@@ -4,8 +4,6 @@ import bgu.spl.a2.Promise;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * this class is related to {@link Computer}
@@ -16,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class SuspendingMutex {
 
-	private Lock lock;
+	private boolean locked;
 	private Queue<Promise<Computer>> queue;
 	public Computer computer;
 
@@ -27,7 +25,7 @@ public class SuspendingMutex {
 	 */
 	public SuspendingMutex(Computer computer) {
 		this.computer = computer;
-		lock = new ReentrantLock();
+		locked = false;
 		queue = new ConcurrentLinkedQueue<>();
 	}
 
@@ -39,7 +37,8 @@ public class SuspendingMutex {
 	 */
 	public synchronized Promise<Computer> down() {
 		Promise<Computer> newPromise = new Promise<>();
-		if (lock.tryLock()) {
+		if (!locked) {
+			locked = true;
 			newPromise.resolve(this.computer);
 		} else
 			queue.add(newPromise);
@@ -54,6 +53,6 @@ public class SuspendingMutex {
 		if (!queue.isEmpty())
 			queue.remove().resolve(this.computer);
 		else
-			lock.unlock();
+			locked = false;
 	}
 }

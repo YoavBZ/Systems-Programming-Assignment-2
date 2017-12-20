@@ -8,9 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UnregisterAll extends Action<Boolean> {
+	public UnregisterAll() {
+		setActionName(getClass().getName());
+	}
 
 	public void start() {
-		System.out.println("#### " + getActionName() + ": start()");
+		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
+		state.addRecord(getActionName());
 		List<String> registered = ((CoursePrivateState) state).getRegStudents();
 		List<Action<?>> requiredActions = new ArrayList<>();
 		for (String student : registered) {

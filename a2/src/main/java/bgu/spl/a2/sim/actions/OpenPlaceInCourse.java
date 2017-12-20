@@ -8,11 +8,14 @@ public class OpenPlaceInCourse extends Action<Boolean> {
 	private int spaceToAdd;
 
 	public OpenPlaceInCourse(int spaceToAdd) {
+		setActionName("Open Place In Course");
 		this.spaceToAdd = spaceToAdd;
 	}
 
 	@Override
 	protected void start() {
+		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
+		state.addRecord(getActionName());
 		((CoursePrivateState) state).setAvailableSpots(((CoursePrivateState) state).getAvailableSpots() + spaceToAdd);
 		complete(true);
 	}

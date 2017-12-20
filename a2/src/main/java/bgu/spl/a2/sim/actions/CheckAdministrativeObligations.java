@@ -8,6 +8,7 @@ import bgu.spl.a2.sim.Warehouse;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -23,39 +24,30 @@ public class CheckAdministrativeObligations extends Action<Boolean> {
 		this.computerType = computerType;
 		this.students = students;
 		this.conditions = conditions;
+		setActionName("Administrative Check");
 	}
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + getActionName() + ": start()");
+		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
+		state.addRecord(getActionName());
 		List<Action<HashMap<String, Integer>>> requiredActions = new ArrayList<>();
 		for (String student : students) {
 			Action<HashMap<String, Integer>> getCourses = new GetStudentGrades();
 			requiredActions.add(getCourses);
 			sendMessage(getCourses, student, new StudentPrivateState());
 		}
+		SuspendingMutex suspendingMutex = warehouse.computers.get(computerType);
 		then(requiredActions, () -> {
-			for (SuspendingMutex suspendingMutex : warehouse.suspendingMutexes) {
-				if (suspendingMutex.computer.computerType.equals(computerType)) {
-					Promise<Computer> computerPromise = suspendingMutex.down();
-					computerPromise.subscribe(() -> {
-						try {
-							List<Action<?>> updateSignatures = new ArrayList<>();
-							for (int i = 0; i < requiredActions.size(); i++) {
-								Action<HashMap<String, Integer>> action = requiredActions.get(i);
-								HashMap<String, Integer> coursesGrades = action.getResult().get();
-								long sig = computerPromise.get().checkAndSign(conditions, coursesGrades);
-								Action<?> updateSignature = new UpdateSignature(students.get(i), sig);
-								updateSignatures.add(updateSignature);
-								sendMessage(updateSignature, students.get(i), new StudentPrivateState());
-							}
-							then(updateSignatures, () -> complete(true));
-						} finally {
-							suspendingMutex.up();
-						}
-					});
-				}
-			}
+			Promise<Computer> computerPromise = suspendingMutex.down();
+			Action<Boolean> checkAndSign = new CheckAndSign(computerPromise, requiredActions, students, conditions, warehouse);
+			computerPromise.subscribe(() -> sendMessage(checkAndSign, actorId, state));
+			then(Collections.singleton(checkAndSign), () -> {
+				if (checkAndSign.getResult().get())
+					complete(true);
+				else
+					complete(false);
+			});
 		});
 	}
 }

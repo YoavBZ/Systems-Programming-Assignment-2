@@ -14,6 +14,7 @@ public class OpenNewCourse extends Action<Boolean> {
 	private List<String> prequisites;
 
 	public OpenNewCourse(String courseName, int availableSpots, List<String> prequisites, String department) {
+		setActionName("Open Course");
 		this.courseName = courseName;
 		this.availableSpots = availableSpots;
 		this.prequisites = prequisites;
@@ -21,7 +22,8 @@ public class OpenNewCourse extends Action<Boolean> {
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + getActionName() + ": start()");
+		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
+		state.addRecord(getActionName());
 		List<String> courses = ((DepartmentPrivateState) state).getCourseList();
 		if (!courses.contains(courseName)) {
 			System.out.println("Creating course " + courseName);
@@ -34,7 +36,10 @@ public class OpenNewCourse extends Action<Boolean> {
 			});
 		} else {
 			System.out.println("Course " + courseName + " has already been created");
-			then(Collections.emptyList(), () -> complete(false));
+			then(Collections.emptyList(), () -> {
+				complete(false);
+				System.out.println("open " + courseName + " completed");
+			});
 		}
 	}
 }

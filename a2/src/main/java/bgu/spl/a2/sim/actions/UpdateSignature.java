@@ -9,13 +9,15 @@ public class UpdateSignature extends Action<Boolean> {
 	private long signature;
 
 	public UpdateSignature(String studentName, long signature) {
+		setActionName(getClass().getName());
 		this.studentName = studentName;
 		this.signature = signature;
 	}
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + getActionName() + ": start()");
+		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
+		state.addRecord(getActionName());
 		((StudentPrivateState) state).setSignature(signature);
 		System.out.println("Initiated student " + studentName);
 		complete(true);

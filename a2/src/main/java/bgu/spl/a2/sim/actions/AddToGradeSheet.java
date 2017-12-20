@@ -8,16 +8,18 @@ public class AddToGradeSheet extends Action<Boolean> {
 	private int grade;
 	private String courseName;
 
-	public AddToGradeSheet(String courseName,int grade){
-		this.grade=grade;
-		this.courseName=courseName;
+	public AddToGradeSheet(String courseName, int grade) {
+		setActionName(getClass().getName());
+		this.grade = grade;
+		this.courseName = courseName;
 
 	}
 
 	@Override
 	protected void start() {
 		System.out.println("#### " + getActionName() + ": start()");
-		((StudentPrivateState)state).getGrades().put(courseName,grade);
+		state.addRecord(getActionName());
+		((StudentPrivateState) state).getGrades().put(courseName, grade);
 		complete(true);
 	}
 }
