@@ -9,14 +9,14 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RunWith(Parameterized.class)
-public class SimulatorTest {
+public class MultipleSimulatorTests {
 
 	@Parameterized.Parameters
 	public static Collection parameters() {
 		return Arrays.asList(new Object[1000][]);
 	}
 
-	public SimulatorTest(Object param) {
+	public MultipleSimulatorTests(Object param) {
 	}
 
 	// Running the Simulator multiple times

@@ -98,11 +98,9 @@ public class ActionTest {
 		protected void start() {
 			System.out.println("#### " + getActionName() + ": start()");
 			Action<Boolean> confAction = new Confirmation(amount, sender, receiver, receiverBank);
-			List<Action<?>> requiredActions = Collections.singletonList(confAction);
 			sendMessage(confAction, receiverBank, new BankState());
-			then(requiredActions, () -> {
-				Boolean result = (Boolean) requiredActions.get(0).getResult().get();
-				if (result) {
+			then(Collections.singletonList(confAction), () -> {
+				if (confAction.getResult().get()) {
 					System.out.println("Transaction Succeeded");
 					Pair<String, Integer> client = ((BankState) state).clients.remove(0);
 					((BankState) state).clients.add(new Pair<>(client.getKey(), client.getValue() - amount));

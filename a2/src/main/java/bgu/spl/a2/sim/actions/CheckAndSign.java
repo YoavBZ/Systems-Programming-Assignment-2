@@ -41,8 +41,5 @@ public class CheckAndSign extends Action<Boolean> {
 		}
 		warehouse.computers.get(computerPromise.get().computerType).up();
 		then(updateSignatures, () -> complete(true));
-
-
 	}
-
 }

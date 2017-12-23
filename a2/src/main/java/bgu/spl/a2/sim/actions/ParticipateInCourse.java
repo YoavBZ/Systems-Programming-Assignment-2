@@ -4,7 +4,10 @@ import bgu.spl.a2.Action;
 import bgu.spl.a2.sim.privateStates.CoursePrivateState;
 import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 public class ParticipateInCourse extends Action<Boolean> {
 
@@ -27,10 +30,8 @@ public class ParticipateInCourse extends Action<Boolean> {
 		} else {
 			List<String> prequisites = ((CoursePrivateState) state).getPrequisites();
 			Action<HashMap<String, Integer>> getCourses = new GetStudentGrades();
-			List<Action<?>> requiredActions = new ArrayList<>();
-			requiredActions.add(getCourses);
 			sendMessage(getCourses, studentName, new StudentPrivateState());
-			then(requiredActions, () -> {
+			then(Collections.singletonList(getCourses), () -> {
 				Set<String> result = getCourses.getResult().get().keySet();
 				if (((CoursePrivateState) state).getAvailableSpots() > 0 && result.containsAll(prequisites)) {
 					System.out.println("Registered " + studentName + " successfully");
@@ -38,9 +39,8 @@ public class ParticipateInCourse extends Action<Boolean> {
 					((CoursePrivateState) state).decAvailable();
 					regStudents.add(studentName);
 					Action<Boolean> addToGradeSheet = new AddToGradeSheet(actorId, studentGrade);
-					requiredActions.add(addToGradeSheet);
-					sendMessage(addToGradeSheet, studentName, new StudentPrivateState()).subscribe(() -> threadPool.submit(this, actorId, state));
-					then(Collections.singleton(addToGradeSheet), () -> complete(true));
+					sendMessage(addToGradeSheet, studentName, new StudentPrivateState());
+					then(Collections.singletonList(addToGradeSheet), () -> complete(true));
 				} else {
 					System.out.println("Registered " + studentName + " unsuccessfully");
 					complete(false);

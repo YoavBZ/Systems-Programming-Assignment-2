@@ -23,9 +23,8 @@ public class CloseCourse extends Action<Boolean> {
 		List<String> courseList = ((DepartmentPrivateState) state).getCourseList();
 		if (courseList.contains(courseName)) {
 			Action<Boolean> unregisterAll = new UnregisterAll();
-			List<Action<?>> requiredActions = Collections.singletonList(unregisterAll);
 			sendMessage(unregisterAll, courseName, new CoursePrivateState());
-			then(requiredActions, () -> {
+			then(Collections.singletonList(unregisterAll), () -> {
 				if (unregisterAll.getResult().get()) {
 					courseList.remove(courseName);
 					complete(true);

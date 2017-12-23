@@ -9,7 +9,7 @@ public class AddToGradeSheet extends Action<Boolean> {
 	private String courseName;
 
 	public AddToGradeSheet(String courseName, int grade) {
-		setActionName(getClass().getName());
+		setActionName(getClass().getSimpleName());
 		this.grade = grade;
 		this.courseName = courseName;
 

@@ -22,9 +22,8 @@ public class Unregister extends Action<Boolean> {
 		List<String> registered = ((CoursePrivateState) state).getRegStudents();
 		if (registered.contains(studentName)) {
 			Action<Boolean> removeFromGradeSheet = new RemoveFromGradeSheet(actorId);
-			List<Action<?>> requiredActions = Collections.singletonList(removeFromGradeSheet);
 			sendMessage(removeFromGradeSheet, studentName, new StudentPrivateState());
-			then(requiredActions, () -> {
+			then(Collections.singletonList(removeFromGradeSheet), () -> {
 				if (removeFromGradeSheet.getResult().get()) {
 					registered.remove(studentName);
 					((CoursePrivateState) state).incAvailable();
@@ -34,8 +33,9 @@ public class Unregister extends Action<Boolean> {
 					complete(false);
 				}
 			});
+		} else {
+			System.out.println("wasn't registered");
+			complete(false);
 		}
-		System.out.println("wasn't registered");
-		complete(false);
 	}
 }
