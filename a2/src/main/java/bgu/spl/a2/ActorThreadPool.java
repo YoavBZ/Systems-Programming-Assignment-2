@@ -1,8 +1,5 @@
 package bgu.spl.a2;
 
-import javafx.util.Pair;
-
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,7 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ActorThreadPool {
 
 	private VersionMonitor versionMonitor;
-	private ConcurrentHashMap<String, Pair<PrivateState, ActorQueue<Action>>> actorsMap;
+	private ConcurrentHashMap<String, PrivateState> privateStates;
+	private ConcurrentHashMap<String, ActorQueue<Action>> queues;
 	private Thread[] threads;
 
 	/**
@@ -35,7 +33,8 @@ public class ActorThreadPool {
 	 */
 	public ActorThreadPool(int nthreads) {
 		versionMonitor = new VersionMonitor();
-		actorsMap = new ConcurrentHashMap<>();
+		privateStates = new ConcurrentHashMap<>();
+		queues = new ConcurrentHashMap<>();
 		threads = new Thread[nthreads];
 		for (int i = 0; i < nthreads; i++) {
 			final int index = i;
@@ -43,22 +42,22 @@ public class ActorThreadPool {
 				while (!Thread.currentThread().isInterrupted()) {
 					try {
 						int version = versionMonitor.getVersion();
-						for (Pair<PrivateState, ActorQueue<Action>> actorPair : actorsMap.values()) {
-							ActorQueue<Action> queue = actorPair.getValue();
-							boolean didAction = false;
+						for (ActorQueue<Action> queue : queues.values()) {
+							boolean handledAction = false;
 							if (queue.getLock().tryLock()) {
-								System.out.println("Thread " + index + " locked queue " + queue.getActorId());
+								String actorId = queue.getActorId();
+								System.out.println("Thread " + index + " locked queue " + actorId);
 								try {
 									if (!queue.isEmpty()) {
 										Action action = queue.remove();
 										System.out.println("Thread " + index + " started working on " + action.getActionName());
-										action.handle(this, queue.getActorId(), actorPair.getKey());
-										didAction = true;
+										action.handle(this, actorId, privateStates.get(actorId));
+										handledAction = true;
 									}
 								} finally {
-									System.out.println("Thread " + index + " unlocked queue " + queue.getActorId());
+									System.out.println("Thread " + index + " unlocked queue " + actorId);
 									queue.getLock().unlock();
-									if (didAction)
+									if (handledAction)
 										versionMonitor.inc();
 								}
 							}
@@ -80,11 +79,7 @@ public class ActorThreadPool {
 	 * @return actors
 	 */
 	public Map<String, PrivateState> getActors() {
-		Map<String, PrivateState> actors = new HashMap<>();
-		for (Map.Entry<String, Pair<PrivateState, ActorQueue<Action>>> actor : actorsMap.entrySet()) {
-			actors.put(actor.getKey(), actor.getValue().getKey());
-		}
-		return actors;
+		return privateStates;
 	}
 
 	/**
@@ -95,29 +90,31 @@ public class ActorThreadPool {
 	 */
 	public PrivateState getPrivateState(String actorId) {
 		try {
-			return actorsMap.get(actorId).getKey();
+			return privateStates.get(actorId);
 		} catch (NullPointerException e) {
 			return null;
 		}
 	}
 
-
 	/**
 	 * submits an action into an actor to be executed by a thread belongs to
 	 * this thread pool
+	 * <p>
+	 * This method is synchronized to prevent creating the same ActorQueue multiple times simultaneously
 	 *
 	 * @param action     the action to execute
 	 * @param actorId    corresponding actor's id
 	 * @param actorState actor's private state (actor's information)
 	 */
-	public void submit(Action<?> action, String actorId, PrivateState actorState) {
+	public synchronized void submit(Action<?> action, String actorId, PrivateState actorState) {
 		System.out.println("Submitted action " + action.getActionName() + " to " + actorId);
-		Pair<PrivateState, ActorQueue<Action>> queuePair = actorsMap.get(actorId);
-		if (queuePair == null) {
-			queuePair = new Pair<>(actorState, new ActorQueue<Action>(actorId));
-			actorsMap.put(actorId, queuePair);
+		ActorQueue<Action> queue = queues.get(actorId);
+		if (queue == null) {
+			queue = new ActorQueue<>(actorId);
+			privateStates.put(actorId, actorState);
+			queues.put(actorId, queue);
 		}
-		queuePair.getValue().add(action);
+		queue.add(action);
 		System.out.println("Version incremented!");
 		versionMonitor.inc();
 	}
@@ -134,6 +131,7 @@ public class ActorThreadPool {
 	public void shutdown() throws InterruptedException {
 		for (Thread thread : threads) {
 			thread.interrupt();
+			thread.join();
 		}
 	}
 
@@ -143,14 +141,5 @@ public class ActorThreadPool {
 	public void start() {
 		for (Thread thread : threads)
 			thread.start();
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder str = new StringBuilder();
-		for (Pair<PrivateState, ActorQueue<Action>> pair : actorsMap.values()) {
-			str.append(pair.getKey()).append("\n");
-		}
-		return str.toString();
 	}
 }

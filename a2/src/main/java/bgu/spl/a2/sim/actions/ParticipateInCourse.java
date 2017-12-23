@@ -20,7 +20,6 @@ public class ParticipateInCourse extends Action<Boolean> {
 	@Override
 	protected void start() {
 		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
-		state.addRecord(getActionName());
 		List<String> regStudents = ((CoursePrivateState) state).getRegStudents();
 		if (regStudents.contains(studentName) || ((CoursePrivateState) state).getAvailableSpots() == 0) {
 			System.out.println("Student " + studentName + " is already registered, or there's no place");

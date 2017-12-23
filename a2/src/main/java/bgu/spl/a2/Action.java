@@ -22,7 +22,7 @@ public abstract class Action<R> {
 	private String actionName;
 	private AtomicInteger completedActions = new AtomicInteger(0);
 	private Promise<R> promise = new Promise<>();
-	protected callback continuation;
+	private callback continuation;
 
 	/**
 	 * start handling the action - note that this method is protected, a thread

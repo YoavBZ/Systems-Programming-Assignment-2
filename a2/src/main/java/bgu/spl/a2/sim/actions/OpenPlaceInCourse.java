@@ -15,7 +15,6 @@ public class OpenPlaceInCourse extends Action<Boolean> {
 	@Override
 	protected void start() {
 		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
-		state.addRecord(getActionName());
 		((CoursePrivateState) state).setAvailableSpots(((CoursePrivateState) state).getAvailableSpots() + spaceToAdd);
 		complete(true);
 	}

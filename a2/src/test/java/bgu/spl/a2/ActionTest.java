@@ -127,7 +127,6 @@ public class ActionTest {
 			this.receiver = receiver;
 			this.receiverBank = receiverBank;
 			setActionName("Confirmation");
-			privateState.addRecord(getActionName());
 		}
 
 		@Override

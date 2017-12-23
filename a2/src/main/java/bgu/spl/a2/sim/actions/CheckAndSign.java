@@ -20,7 +20,7 @@ public class CheckAndSign extends Action<Boolean> {
 
 
 	public CheckAndSign(Promise<Computer> computerPromise, List<Action<HashMap<String, Integer>>> requiredActions, List<String> students, List<String> conditions, Warehouse warehouse) {
-		setActionName(getClass().getName());
+		setActionName(getClass().getSimpleName());
 		this.computerPromise = computerPromise;
 		this.requiredActions = requiredActions;
 		this.students = students;
@@ -30,7 +30,6 @@ public class CheckAndSign extends Action<Boolean> {
 
 	public void start() {
 		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
-		state.addRecord(getActionName());
 		List<Action<?>> updateSignatures = new ArrayList<>();
 		for (int i = 0; i < requiredActions.size(); i++) {
 			Action<HashMap<String, Integer>> action = requiredActions.get(i);

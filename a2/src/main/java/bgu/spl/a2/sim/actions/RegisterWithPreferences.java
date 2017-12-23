@@ -21,7 +21,6 @@ public class RegisterWithPreferences extends Action<Boolean> {
 
 	public void start() {
 		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
-		state.addRecord(getActionName());
 		List<Action<Boolean>> requiredActions = new ArrayList<>();
 		Action<Boolean> nextPreference = new ParticipateInCourse(actorId, grades.remove(0));
 		requiredActions.add(nextPreference);
@@ -41,5 +40,4 @@ public class RegisterWithPreferences extends Action<Boolean> {
 			}
 		});
 	}
-
 }

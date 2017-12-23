@@ -31,7 +31,6 @@ import java.util.concurrent.CountDownLatch;
 public class Simulator {
 
 	public static ActorThreadPool actorThreadPool;
-	private static File jsonFile;
 	private static JsonObject jsonObject;
 	private static Warehouse warehouse;
 
@@ -41,12 +40,11 @@ public class Simulator {
 	public static void start() {
 		actorThreadPool.start();
 		Computer[] computers = new Computer[jsonObject.get("Computers").getAsJsonArray().size()];
-		int i = 0;
-		for (JsonElement element : jsonObject.get("Computers").getAsJsonArray()) {
+		for (int i = 0; i < jsonObject.get("Computers").getAsJsonArray().size(); i++) {
+			JsonElement element = jsonObject.get("Computers").getAsJsonArray().get(i);
 			computers[i] = new Computer(element.getAsJsonObject().get("Type").getAsString());
 			computers[i].failSig = element.getAsJsonObject().get("Sig Fail").getAsLong();
 			computers[i].successSig = element.getAsJsonObject().get("Sig Success").getAsLong();
-			i++;
 		}
 		warehouse = new Warehouse(computers);
 		// Phase 1
@@ -59,9 +57,8 @@ public class Simulator {
 
 	private static ArrayList<String> toList(JsonArray arr) {
 		ArrayList<String> list = new ArrayList<>();
-		for (JsonElement element : arr) {
+		for (JsonElement element : arr)
 			list.add(element.getAsString());
-		}
 		return list;
 	}
 
@@ -70,30 +67,39 @@ public class Simulator {
 		for (JsonElement element : array) {
 			JsonObject jsonObject = element.getAsJsonObject();
 			Action<Boolean> action = null;
-			if (jsonObject.get("Action").getAsString().equals("Participate In Course")) {
-				action = new ParticipateInCourse(jsonObject.get("Student").getAsString(), jsonObject.get("Grade").getAsString());
-				actorThreadPool.submit(action, jsonObject.get("Course").getAsString(), new CoursePrivateState());
-			} else if (jsonObject.get("Action").getAsString().equals("Add Student")) {
-				action = new AddNewStudent(jsonObject.get("Student").getAsString());
-				actorThreadPool.submit(action, jsonObject.get("Department").getAsString(), new DepartmentPrivateState());
-			} else if (jsonObject.get("Action").getAsString().equals("Open Course")) {
-				action = new OpenNewCourse(jsonObject.get("Course").getAsString(), jsonObject.get("Space").getAsInt(), toList(jsonObject.get("Prerequisites").getAsJsonArray()), jsonObject.get("Department").getAsString());
-				actorThreadPool.submit(action, jsonObject.get("Department").getAsString(), new DepartmentPrivateState());
-			} else if (jsonObject.get("Action").getAsString().equals("Add Spaces")) {
-				action = new OpenPlaceInCourse(jsonObject.get("Number").getAsInt());
-				actorThreadPool.submit(action, jsonObject.get("Course").getAsString(), new CoursePrivateState());
-			} else if (jsonObject.get("Action").getAsString().equals("Unregister")) {
-				action = new Unregister(jsonObject.get("Student").getAsString());
-				actorThreadPool.submit(action, jsonObject.get("Course").getAsString(), new CoursePrivateState());
-			} else if (jsonObject.get("Action").getAsString().equals("Close Course")) {
-				action = new CloseCourse(jsonObject.get("Course").getAsString());
-				actorThreadPool.submit(action, jsonObject.get("Department").getAsString(), new DepartmentPrivateState());
-			} else if (jsonObject.get("Action").getAsString().equals("Register With Preferences")) {
-				action = new RegisterWithPreferences(toList(jsonObject.get("Preferences").getAsJsonArray()), toList(jsonObject.get("Grade").getAsJsonArray()));
-				actorThreadPool.submit(action, jsonObject.get("Student").getAsString(), new StudentPrivateState());
-			} else if (jsonObject.get("Action").getAsString().equals("Administrative Check")) {
-				action = new CheckAdministrativeObligations(warehouse, jsonObject.get("Computer").getAsString(), toList(jsonObject.get("Students").getAsJsonArray()), toList(jsonObject.get("Conditions").getAsJsonArray()));
-				actorThreadPool.submit(action, jsonObject.get("Department").getAsString(), new DepartmentPrivateState());
+			switch (jsonObject.get("Action").getAsString()) {
+				case "Participate In Course":
+					action = new ParticipateInCourse(jsonObject.get("Student").getAsString(), jsonObject.get("Grade").getAsString());
+					actorThreadPool.submit(action, jsonObject.get("Course").getAsString(), new CoursePrivateState());
+					break;
+				case "Add Student":
+					action = new AddStudent(jsonObject.get("Student").getAsString());
+					actorThreadPool.submit(action, jsonObject.get("Department").getAsString(), new DepartmentPrivateState());
+					break;
+				case "Open Course":
+					action = new OpenCourse(jsonObject.get("Course").getAsString(), jsonObject.get("Space").getAsInt(), toList(jsonObject.get("Prerequisites").getAsJsonArray()), jsonObject.get("Department").getAsString());
+					actorThreadPool.submit(action, jsonObject.get("Department").getAsString(), new DepartmentPrivateState());
+					break;
+				case "Add Spaces":
+					action = new OpenPlaceInCourse(jsonObject.get("Number").getAsInt());
+					actorThreadPool.submit(action, jsonObject.get("Course").getAsString(), new CoursePrivateState());
+					break;
+				case "Unregister":
+					action = new Unregister(jsonObject.get("Student").getAsString());
+					actorThreadPool.submit(action, jsonObject.get("Course").getAsString(), new CoursePrivateState());
+					break;
+				case "Close Course":
+					action = new CloseCourse(jsonObject.get("Course").getAsString());
+					actorThreadPool.submit(action, jsonObject.get("Department").getAsString(), new DepartmentPrivateState());
+					break;
+				case "Register With Preferences":
+					action = new RegisterWithPreferences(toList(jsonObject.get("Preferences").getAsJsonArray()), toList(jsonObject.get("Grade").getAsJsonArray()));
+					actorThreadPool.submit(action, jsonObject.get("Student").getAsString(), new StudentPrivateState());
+					break;
+				case "Administrative Check":
+					action = new CheckAdministrativeObligations(warehouse, jsonObject.get("Computer").getAsString(), toList(jsonObject.get("Students").getAsJsonArray()), toList(jsonObject.get("Conditions").getAsJsonArray()));
+					actorThreadPool.submit(action, jsonObject.get("Department").getAsString(), new DepartmentPrivateState());
+					break;
 			}
 			if (action != null) {
 				action.getResult().subscribe(() -> {
@@ -123,29 +129,31 @@ public class Simulator {
 	 */
 	public static HashMap<String, PrivateState> end() {
 		try {
+			System.out.println("Shutting down Simulator");
 			actorThreadPool.shutdown();
-		} catch (InterruptedException e) {
+		} catch (InterruptedException ignored) {
 		}
-		return (HashMap<String, PrivateState>) actorThreadPool.getActors();
+		return new HashMap<>(actorThreadPool.getActors());
 	}
 
-	public static void main(String[] args) {
-		jsonFile = new File(args[0]);
+	public static int main(String[] args) {
+		System.out.println("Simulator main()");
+		File jsonFile = new File(args[0]);
 		JsonParser parser = new JsonParser();
 		try {
-			JsonElement element = parser.parse(new FileReader(jsonFile));
-			jsonObject = element.getAsJsonObject();
+			// Parsing the input file into a JsonObject
+			jsonObject = parser.parse(new FileReader(jsonFile)).getAsJsonObject();
+			// Initiating the ActorThreadPool with the given # of Thread
 			attachActorThreadPool(new ActorThreadPool(jsonObject.get("threads").getAsInt()));
 			start();
 			HashMap<String, PrivateState> SimulationResult;
 			SimulationResult = end();
-			FileOutputStream fout = new FileOutputStream("result.ser");
-			ObjectOutputStream oos = new ObjectOutputStream(fout);
+			// Saving the result into an output file
+			ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("result.ser"));
 			oos.writeObject(SimulationResult);
 		} catch (Exception e) {
-			e.printStackTrace();
-//            return 1;
+			return 1;
 		}
-//        return 0;
+		return 0;
 	}
 }

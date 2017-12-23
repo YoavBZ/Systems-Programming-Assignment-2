@@ -19,7 +19,6 @@ public class Unregister extends Action<Boolean> {
 	@Override
 	protected void start() {
 		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
-		state.addRecord(getActionName());
 		List<String> registered = ((CoursePrivateState) state).getRegStudents();
 		if (registered.contains(studentName)) {
 			Action<Boolean> removeFromGradeSheet = new RemoveFromGradeSheet(actorId);
