@@ -97,7 +97,7 @@ public class ActionTest {
 		@Override
 		protected void start() {
 			System.out.println("#### " + getActionName() + ": start()");
-			Action<Boolean> confAction = new Confirmation(amount, sender, receiver, receiverBank, new BankState());
+			Action<Boolean> confAction = new Confirmation(amount, sender, receiver, receiverBank);
 			List<Action<?>> requiredActions = Collections.singletonList(confAction);
 			sendMessage(confAction, receiverBank, new BankState());
 			then(requiredActions, () -> {
@@ -121,7 +121,7 @@ public class ActionTest {
 		String receiver;
 		String receiverBank;
 
-		public Confirmation(int amount, String sender, String receiver, String receiverBank, PrivateState privateState) {
+		public Confirmation(int amount, String sender, String receiver, String receiverBank) {
 			this.amount = amount;
 			this.sender = sender;
 			this.receiver = receiver;

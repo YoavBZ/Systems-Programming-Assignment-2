@@ -12,8 +12,8 @@ import java.util.List;
 
 public class CheckAndSign extends Action<Boolean> {
 
-	Promise<Computer> computerPromise;
-	List<Action<HashMap<String, Integer>>> requiredActions;
+	private Promise<Computer> computerPromise;
+	private List<Action<HashMap<String, Integer>>> requiredActions;
 	private List<String> students;
 	private List<String> conditions;
 	private Warehouse warehouse;

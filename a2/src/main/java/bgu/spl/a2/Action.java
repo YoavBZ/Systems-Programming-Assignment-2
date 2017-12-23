@@ -27,8 +27,6 @@ public abstract class Action<R> {
 	/**
 	 * start handling the action - note that this method is protected, a thread
 	 * cannot call it directly.
-	 * <p>
-	 * This method will define the continuation callback
 	 */
 	protected abstract void start();
 
@@ -42,8 +40,7 @@ public abstract class Action<R> {
 	 * the same package can access it - you should *not* change it to
 	 * public/private/protected
 	 */
-	/*package*/
-	final void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
+	/*package*/	final void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
 		System.out.println("#### " + actorId + ": " + actionName + ": handle()");
 		threadPool = pool;
 		state = actorState;

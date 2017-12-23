@@ -13,7 +13,7 @@ public class OpenCourse extends Action<Boolean> {
 	private int availableSpots;
 	private List<String> prequisites;
 
-	public OpenCourse(String courseName, int availableSpots, List<String> prequisites, String department) {
+	public OpenCourse(String courseName, int availableSpots, List<String> prequisites) {
 		setActionName("Open Course");
 		this.courseName = courseName;
 		this.availableSpots = availableSpots;

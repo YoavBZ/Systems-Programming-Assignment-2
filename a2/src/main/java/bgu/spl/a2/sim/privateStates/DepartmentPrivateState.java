@@ -1,10 +1,9 @@
 package bgu.spl.a2.sim.privateStates;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-
 import bgu.spl.a2.PrivateState;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * this class describe department's private state
@@ -30,5 +29,4 @@ public class DepartmentPrivateState extends PrivateState {
 	public List<String> getStudentList() {
 		return studentList;
 	}
-
 }

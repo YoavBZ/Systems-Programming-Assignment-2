@@ -2,8 +2,8 @@ package bgu.spl.a2.sim;
 
 import bgu.spl.a2.Promise;
 
+import java.util.ArrayDeque;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * this class is related to {@link Computer}
@@ -26,7 +26,7 @@ public class SuspendingMutex {
 	public SuspendingMutex(Computer computer) {
 		this.computer = computer;
 		locked = false;
-		queue = new ConcurrentLinkedQueue<>();
+		queue = new ArrayDeque<>();
 	}
 
 	/**

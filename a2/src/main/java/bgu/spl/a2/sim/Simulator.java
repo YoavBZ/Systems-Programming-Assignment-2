@@ -77,7 +77,7 @@ public class Simulator {
 					actorThreadPool.submit(action, jsonObject.get("Department").getAsString(), new DepartmentPrivateState());
 					break;
 				case "Open Course":
-					action = new OpenCourse(jsonObject.get("Course").getAsString(), jsonObject.get("Space").getAsInt(), toList(jsonObject.get("Prerequisites").getAsJsonArray()), jsonObject.get("Department").getAsString());
+					action = new OpenCourse(jsonObject.get("Course").getAsString(), jsonObject.get("Space").getAsInt(), toList(jsonObject.get("Prerequisites").getAsJsonArray()));
 					actorThreadPool.submit(action, jsonObject.get("Department").getAsString(), new DepartmentPrivateState());
 					break;
 				case "Add Spaces":

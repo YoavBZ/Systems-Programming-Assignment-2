@@ -1,7 +1,6 @@
 package bgu.spl.a2.sim;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

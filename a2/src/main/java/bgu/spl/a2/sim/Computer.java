@@ -30,20 +30,4 @@ public class Computer {
 		}
 		return successSig;
 	}
-
-	public long getFailSig() {
-		return failSig;
-	}
-
-	public void setFailSig(long failSig) {
-		this.failSig = failSig;
-	}
-
-	public long getSuccessSig() {
-		return successSig;
-	}
-
-	public void setSuccessSig(long successSig) {
-		this.successSig = successSig;
-	}
 }

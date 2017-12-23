@@ -27,7 +27,7 @@ public class Unregister extends Action<Boolean> {
 			then(requiredActions, () -> {
 				if (removeFromGradeSheet.getResult().get()) {
 					registered.remove(studentName);
-					((CoursePrivateState) state).incAvaolable();
+					((CoursePrivateState) state).incAvailable();
 					((CoursePrivateState) state).decRegistered();
 					complete(true);
 				} else {

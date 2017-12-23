@@ -55,7 +55,7 @@ public class CoursePrivateState extends PrivateState {
 		registered++;
 	}
 
-	public void incAvaolable() {
+	public void incAvailable() {
 		availableSpots++;
 	}
 
