@@ -39,7 +39,7 @@ public class ActorThreadPool {
 		for (int i = 0; i < nthreads; i++) {
 			final int index = i;
 			threads[i] = new Thread(() -> {
-				while (!Thread.currentThread().isInterrupted()) {
+				while (!Thread.interrupted()) {
 					try {
 						int version = versionMonitor.getVersion();
 						for (ActorQueue<Action> queue : queues.values()) {
@@ -61,12 +61,14 @@ public class ActorThreadPool {
 										versionMonitor.inc();
 								}
 							}
+							if (Thread.interrupted())
+								return;
 						}
 						System.out.println("Thread " + index + " await()");
 						versionMonitor.await(version);
 					} catch (InterruptedException e) {
 						System.out.println("Thread " + index + " interrupted");
-						break;
+						return;
 					}
 				}
 			});
