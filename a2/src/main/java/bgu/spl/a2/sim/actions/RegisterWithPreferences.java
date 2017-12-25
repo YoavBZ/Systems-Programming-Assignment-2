@@ -12,7 +12,6 @@ public class RegisterWithPreferences extends Action<Boolean> {
 	private ArrayList<String> preferences;
 	private ArrayList<String> grades;
 
-
 	public RegisterWithPreferences(ArrayList<String> preferences, ArrayList<String> grades) {
 		setActionName("Register With Preferences");
 		this.preferences = preferences;
@@ -26,17 +25,16 @@ public class RegisterWithPreferences extends Action<Boolean> {
 		requiredActions.add(nextPreference);
 		for (int i = 1; i < preferences.size(); i++) {
 			nextPreference = new ParticipateInCourse(actorId, grades.remove(0));
-			nextPreference.getResult().subscribe(() -> threadPool.submit(this, actorId, state));
 			requiredActions.add(nextPreference);
 		}
 		sendMessage(requiredActions.get(0), preferences.remove(0), new CoursePrivateState());
-		then(Collections.singleton(requiredActions.get(0)), () -> {
+		then(Collections.singletonList(requiredActions.get(0)), () -> {
 			if (requiredActions.remove(0).getResult().get()) {
 				complete(true);
 			} else if (requiredActions.isEmpty())
 				complete(false);
 			else {
-				sendMessage(requiredActions.get(0), preferences.remove(0), new CoursePrivateState());
+				sendMessage(requiredActions.get(0), preferences.remove(0), new CoursePrivateState()).subscribe(() -> threadPool.submit(this, actorId, state));
 			}
 		});
 	}

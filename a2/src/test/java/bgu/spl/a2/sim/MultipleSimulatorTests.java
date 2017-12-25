@@ -13,7 +13,7 @@ public class MultipleSimulatorTests {
 
 	@Parameterized.Parameters
 	public static Collection parameters() {
-		return Arrays.asList(new Object[1000][]);
+		return Arrays.asList(new Object[10000][]);
 	}
 
 	public MultipleSimulatorTests(Object param) {
