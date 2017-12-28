@@ -7,6 +7,9 @@ import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This action unregisters a course (= actorId) for each student in the registered students list,
+ */
 public class UnregisterAll extends Action<Boolean> {
 
 	public UnregisterAll() {
@@ -14,17 +17,16 @@ public class UnregisterAll extends Action<Boolean> {
 	}
 
 	public void start() {
-		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
-		List<String> registered = ((CoursePrivateState) state).getRegStudents();
+		List<String> registeredStudents = ((CoursePrivateState) state).getRegStudents();
 		List<Action<?>> requiredActions = new ArrayList<>();
-		for (String student : registered) {
+		for (String student : registeredStudents) {
 			Action<Boolean> removeFromGradeSheet = new RemoveFromGradeSheet(actorId);
 			requiredActions.add(removeFromGradeSheet);
 			sendMessage(removeFromGradeSheet, student, new StudentPrivateState());
 		}
+		((CoursePrivateState) state).setAvailableSpots(-1);
 		then(requiredActions, () -> {
-			registered.clear();
-			((CoursePrivateState) state).setAvailableSpots(-1);
+			registeredStudents.clear();
 			((CoursePrivateState) state).setRegistered(0);
 			complete(true);
 		});

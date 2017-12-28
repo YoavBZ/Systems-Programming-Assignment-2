@@ -13,9 +13,7 @@ public class GetStudentGrades extends Action<HashMap<String, Integer>> {
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
 		HashMap<String, Integer> courses = new HashMap<>(((StudentPrivateState) state).getGrades());
-		System.out.println("Fetched course");
 		complete(courses);
 	}
 }

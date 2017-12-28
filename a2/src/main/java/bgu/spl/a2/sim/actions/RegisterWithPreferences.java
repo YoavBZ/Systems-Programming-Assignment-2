@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This method tries to register the student (= actorId) to (at most) one of the given preferences.
+ */
 public class RegisterWithPreferences extends Action<Boolean> {
 
 	private ArrayList<String> preferences;
@@ -19,7 +22,6 @@ public class RegisterWithPreferences extends Action<Boolean> {
 	}
 
 	public void start() {
-		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
 		List<Action<Boolean>> requiredActions = new ArrayList<>();
 		Action<Boolean> nextPreference = new ParticipateInCourse(actorId, grades.remove(0));
 		requiredActions.add(nextPreference);
@@ -32,8 +34,10 @@ public class RegisterWithPreferences extends Action<Boolean> {
 			if (requiredActions.remove(0).getResult().get()) {
 				complete(true);
 			} else if (requiredActions.isEmpty())
+				// Failed to register the student to a course
 				complete(false);
 			else {
+				// In case we can try to register the student to another course
 				sendMessage(requiredActions.get(0), preferences.remove(0), new CoursePrivateState()).subscribe(() -> threadPool.submit(this, actorId, state));
 			}
 		});

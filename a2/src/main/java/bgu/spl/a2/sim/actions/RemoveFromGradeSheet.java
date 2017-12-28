@@ -1,7 +1,7 @@
 package bgu.spl.a2.sim.actions;
 
-import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 import bgu.spl.a2.Action;
+import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 
 public class RemoveFromGradeSheet extends Action<Boolean> {
 	private String courseName;
@@ -12,8 +12,9 @@ public class RemoveFromGradeSheet extends Action<Boolean> {
 	}
 
 	public void start() {
-		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
-		((StudentPrivateState) state).getGrades().remove(courseName);
-		complete(true);
+		if (((StudentPrivateState) state).getGrades().remove(courseName) != null)
+			complete(true);
+		else
+			complete(false);
 	}
 }

@@ -7,6 +7,9 @@ import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This action tries to close the course (= actorId) by using {@link UnregisterAll} action
+ */
 public class CloseCourse extends Action<Boolean> {
 
 	private String courseName;
@@ -18,8 +21,6 @@ public class CloseCourse extends Action<Boolean> {
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + getActionName() + ": start()");
-
 		List<String> courseList = ((DepartmentPrivateState) state).getCourseList();
 		if (courseList.contains(courseName)) {
 			Action<Boolean> unregisterAll = new UnregisterAll();
@@ -30,7 +31,6 @@ public class CloseCourse extends Action<Boolean> {
 					complete(true);
 				} else {
 					complete(false);
-
 				}
 			});
 		} else {

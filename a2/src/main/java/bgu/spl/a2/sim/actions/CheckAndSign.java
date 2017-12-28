@@ -18,24 +18,22 @@ public class CheckAndSign extends Action<Boolean> {
 	private List<String> conditions;
 	private Warehouse warehouse;
 
-
 	public CheckAndSign(Promise<Computer> computerPromise, List<Action<HashMap<String, Integer>>> requiredActions, List<String> students, List<String> conditions, Warehouse warehouse) {
-		setActionName(getClass().getSimpleName());
 		this.computerPromise = computerPromise;
 		this.requiredActions = requiredActions;
 		this.students = students;
 		this.conditions = conditions;
 		this.warehouse = warehouse;
+		setActionName(getClass().getSimpleName());
 	}
 
 	public void start() {
-		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
 		List<Action<?>> updateSignatures = new ArrayList<>();
 		for (int i = 0; i < requiredActions.size(); i++) {
 			Action<HashMap<String, Integer>> action = requiredActions.get(i);
 			HashMap<String, Integer> coursesGrades = action.getResult().get();
 			long sig = computerPromise.get().checkAndSign(conditions, coursesGrades);
-			Action<?> updateSignature = new UpdateSignature(students.get(i), sig);
+			Action<?> updateSignature = new UpdateSignature(sig);
 			updateSignatures.add(updateSignature);
 			sendMessage(updateSignature, students.get(i), new StudentPrivateState());
 		}

@@ -12,6 +12,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * This action fetches all the given students grades, tries to acquire the requested computer,
+ * and to update each student signature by using {@link CheckAndSign} action
+ */
 public class CheckAdministrativeObligations extends Action<Boolean> {
 
 	private String computerType;
@@ -29,7 +33,6 @@ public class CheckAdministrativeObligations extends Action<Boolean> {
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
 		List<Action<HashMap<String, Integer>>> requiredActions = new ArrayList<>();
 		for (String student : students) {
 			Action<HashMap<String, Integer>> getCourses = new GetStudentGrades();

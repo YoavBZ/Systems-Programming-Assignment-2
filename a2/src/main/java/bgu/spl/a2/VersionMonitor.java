@@ -26,11 +26,24 @@ public class VersionMonitor {
 		return version.get();
 	}
 
+	/**
+	 * Increments version
+	 * This method is synchronised since notifyAll() must be called from a synchronized block
+	 * to prevent {@link IllegalMonitorStateException}
+	 */
 	public synchronized void inc() {
 		version.incrementAndGet();
 		notifyAll();
 	}
 
+	/**
+	 * This method await the current thread if the current version equals to the given version
+	 * This method is synchronised since wait() must be called from a synchronised block
+	 * to prevent {@link IllegalMonitorStateException}
+	 *
+	 * @param version a version
+	 * @throws InterruptedException thrown when the current thread is intercepted while waiting
+	 */
 	public synchronized void await(int version) throws InterruptedException {
 		while (version == this.version.get()) {
 			wait();

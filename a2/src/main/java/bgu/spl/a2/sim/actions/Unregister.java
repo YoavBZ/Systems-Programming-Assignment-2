@@ -7,6 +7,9 @@ import bgu.spl.a2.sim.privateStates.StudentPrivateState;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This action unregisters a given student from the current course (= actorId) and updates the course spots
+ */
 public class Unregister extends Action<Boolean> {
 
 	private String studentName;
@@ -18,24 +21,29 @@ public class Unregister extends Action<Boolean> {
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
-		List<String> registered = ((CoursePrivateState) state).getRegStudents();
-		if (registered.contains(studentName)) {
+		if (((CoursePrivateState) state).getAvailableSpots() != -1) {
+			List<String> registered = ((CoursePrivateState) state).getRegStudents();
 			Action<Boolean> removeFromGradeSheet = new RemoveFromGradeSheet(actorId);
-			sendMessage(removeFromGradeSheet, studentName, new StudentPrivateState());
-			then(Collections.singletonList(removeFromGradeSheet), () -> {
-				if (removeFromGradeSheet.getResult().get()) {
+			Action<Boolean> dummyAction = new DummyAction();
+			sendMessage(dummyAction, studentName, new StudentPrivateState());
+			then(Collections.singleton(dummyAction), () -> {
+				sendMessage(removeFromGradeSheet, studentName, new StudentPrivateState());
+				if (registered.contains(studentName) && ((CoursePrivateState) state).getAvailableSpots() != -1) {
 					registered.remove(studentName);
 					((CoursePrivateState) state).incAvailable();
 					((CoursePrivateState) state).decRegistered();
-					complete(true);
-				} else {
-					complete(false);
 				}
+				then(Collections.singletonList(removeFromGradeSheet), () -> {
+					if (removeFromGradeSheet.getResult().get()) {
+						complete(true);
+					} else {
+						complete(false);
+					}
+				});
 			});
 		} else {
-			System.out.println("wasn't registered");
 			complete(false);
 		}
+
 	}
 }

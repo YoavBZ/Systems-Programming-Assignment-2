@@ -21,7 +21,7 @@ public class SuspendingMutex {
 	/**
 	 * Constructor
 	 *
-	 * @param computer
+	 * @param computer a computer
 	 */
 	public SuspendingMutex(Computer computer) {
 		this.computer = computer;
@@ -32,6 +32,9 @@ public class SuspendingMutex {
 	/**
 	 * Computer acquisition procedure
 	 * Note that this procedure is non-blocking and should return immediately
+	 * <p>
+	 * This method is synchronised in order to prevent the scenario when {@link SuspendingMutex#down()} and
+	 * {@link SuspendingMutex#up()} are being called simultaneously
 	 *
 	 * @return a promise for the requested computer
 	 */
@@ -48,6 +51,12 @@ public class SuspendingMutex {
 	/**
 	 * Computer return procedure
 	 * releases a computer which becomes available in the warehouse upon completion
+	 * <p>
+	 * The method  "passes the lock key" to the next department holding the promise,
+	 * by resolving the next {@link Promise} in the queue if exists. Otherwise, unlocks.
+	 * <p>
+	 * * This method is synchronised in order to prevent the scenario when {@link SuspendingMutex#down()} and
+	 * {@link SuspendingMutex#up()} are being called simultaneously
 	 */
 	public synchronized void up() {
 		if (!queue.isEmpty())

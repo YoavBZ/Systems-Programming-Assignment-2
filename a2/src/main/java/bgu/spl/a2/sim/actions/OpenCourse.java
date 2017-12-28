@@ -7,6 +7,9 @@ import bgu.spl.a2.sim.privateStates.DepartmentPrivateState;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This action uses {@link InitCourse} action to initiate to course
+ */
 public class OpenCourse extends Action<Boolean> {
 
 	private String courseName;
@@ -22,22 +25,16 @@ public class OpenCourse extends Action<Boolean> {
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
 		List<String> courses = ((DepartmentPrivateState) state).getCourseList();
 		if (!courses.contains(courseName)) {
-			System.out.println("Creating course " + courseName);
-			Action<Boolean> initCourse = new InitCourse(courseName, availableSpots, prequisites);
+			Action<Boolean> initCourse = new InitCourse(availableSpots, prequisites);
 			sendMessage(initCourse, courseName, new CoursePrivateState());
 			then(Collections.singletonList(initCourse), () -> {
 				courses.add(courseName);
 				complete(true);
 			});
 		} else {
-			System.out.println("Course " + courseName + " has already been created");
-			then(Collections.emptyList(), () -> {
-				complete(false);
-				System.out.println("open " + courseName + " completed");
-			});
+			complete(false);
 		}
 	}
 }

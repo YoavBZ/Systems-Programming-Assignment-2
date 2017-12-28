@@ -36,26 +36,25 @@ public class ActorThreadPool {
 		privateStates = new ConcurrentHashMap<>();
 		queues = new ConcurrentHashMap<>();
 		threads = new Thread[nthreads];
+		// Iterating the threads array and constructing each Thread with the following Runnable
 		for (int i = 0; i < nthreads; i++) {
-			final int index = i;
 			threads[i] = new Thread(() -> {
 				while (!Thread.interrupted()) {
 					try {
+						// Saving the current version in order to know if the Thread should await later
 						int version = versionMonitor.getVersion();
 						for (ActorQueue<Action> queue : queues.values()) {
 							boolean handledAction = false;
+							// Trying to lock the queue and handle an action if exists
 							if (queue.getLock().tryLock()) {
 								String actorId = queue.getActorId();
-								System.out.println("Thread " + index + " locked queue " + actorId);
 								try {
 									if (!queue.isEmpty()) {
 										Action action = queue.remove();
-										System.out.println("Thread " + index + " started working on " + action.getActionName());
 										action.handle(this, actorId, privateStates.get(actorId));
 										handledAction = true;
 									}
 								} finally {
-									System.out.println("Thread " + index + " unlocked queue " + actorId);
 									queue.getLock().unlock();
 									if (handledAction)
 										versionMonitor.inc();
@@ -64,10 +63,8 @@ public class ActorThreadPool {
 							if (Thread.interrupted())
 								return;
 						}
-						System.out.println("Thread " + index + " await()");
 						versionMonitor.await(version);
 					} catch (InterruptedException e) {
-						System.out.println("Thread " + index + " interrupted");
 						return;
 					}
 				}
@@ -91,11 +88,7 @@ public class ActorThreadPool {
 	 * @return actor's private state
 	 */
 	public PrivateState getPrivateState(String actorId) {
-		try {
-			return privateStates.get(actorId);
-		} catch (NullPointerException e) {
-			return null;
-		}
+		return privateStates.get(actorId);
 	}
 
 	/**
@@ -109,7 +102,6 @@ public class ActorThreadPool {
 	 * @param actorState actor's private state (actor's information)
 	 */
 	public synchronized void submit(Action<?> action, String actorId, PrivateState actorState) {
-		System.out.println("Submitted action " + action.getActionName() + " to " + actorId);
 		ActorQueue<Action> queue = queues.get(actorId);
 		if (queue == null) {
 			queue = new ActorQueue<>(actorId);
@@ -117,7 +109,6 @@ public class ActorThreadPool {
 			queues.put(actorId, queue);
 		}
 		queue.add(action);
-		System.out.println("Version incremented!");
 		versionMonitor.inc();
 	}
 

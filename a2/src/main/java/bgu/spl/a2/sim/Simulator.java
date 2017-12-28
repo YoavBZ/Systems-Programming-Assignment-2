@@ -36,6 +36,9 @@ public class Simulator {
 
 	/**
 	 * Begin the simulation Should not be called before attachActorThreadPool()
+	 * <p>
+	 * The method starts the actorThreadPool, parses the jsonObject,
+	 * constructs warehouse and run the phases, one at the time
 	 */
 	public static void start() {
 		actorThreadPool.start();
@@ -55,6 +58,10 @@ public class Simulator {
 		runPhaseActions(jsonObject.get("Phase 3").getAsJsonArray());
 	}
 
+	/**
+	 * @param arr Gson array of strings
+	 * @return an {@link ArrayList<String>} representing the array
+	 */
 	private static ArrayList<String> toList(JsonArray arr) {
 		ArrayList<String> list = new ArrayList<>();
 		for (JsonElement element : arr)
@@ -62,6 +69,12 @@ public class Simulator {
 		return list;
 	}
 
+	/**
+	 * The method iterates a given array and submits all its action objects
+	 * The method uses a {@link CountDownLatch} in order to block the main thread until all actions complete
+	 *
+	 * @param array Gson array of actions
+	 */
 	private static void runPhaseActions(JsonArray array) {
 		CountDownLatch countDownLatch = new CountDownLatch(array.size());
 		for (JsonElement element : array) {
@@ -103,7 +116,6 @@ public class Simulator {
 			}
 			if (action != null) {
 				action.getResult().subscribe(() -> {
-					System.out.println("CountDown");
 					countDownLatch.countDown();
 				});
 			}
@@ -136,8 +148,11 @@ public class Simulator {
 		return new HashMap<>(actorThreadPool.getActors());
 	}
 
+	/**
+	 * @param args program's arguments
+	 * @return 0 if no unhandled exceptions were thrown, or 1 otherwise
+	 */
 	public static int main(String[] args) {
-		System.out.println("Simulator main()");
 		File jsonFile = new File(args[0]);
 		JsonParser parser = new JsonParser();
 		try {

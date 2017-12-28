@@ -17,7 +17,6 @@ public class AddToGradeSheet extends Action<Boolean> {
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + getActionName() + ": start()");
 		((StudentPrivateState) state).getGrades().put(courseName, grade);
 		complete(true);
 	}

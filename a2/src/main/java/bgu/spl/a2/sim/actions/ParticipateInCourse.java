@@ -9,6 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This action tries to register a given student to the course (= actorId).
+ * If succeeded updates the course spots and adds the given grade to the student grades
+ */
 public class ParticipateInCourse extends Action<Boolean> {
 
 	private String studentName;
@@ -22,19 +26,14 @@ public class ParticipateInCourse extends Action<Boolean> {
 
 	@Override
 	protected void start() {
-		System.out.println("#### " + actorId + ": " + getActionName() + ": start()");
 		List<String> regStudents = ((CoursePrivateState) state).getRegStudents();
-		if (regStudents.contains(studentName) || ((CoursePrivateState) state).getAvailableSpots() == 0) {
-			System.out.println("Student " + studentName + " is already registered, or there's no place");
-			complete(false);
-		} else {
+		if (((CoursePrivateState) state).getAvailableSpots() != -1) {
 			List<String> prequisites = ((CoursePrivateState) state).getPrequisites();
 			Action<HashMap<String, Integer>> getCourses = new GetStudentGrades();
 			sendMessage(getCourses, studentName, new StudentPrivateState());
 			then(Collections.singletonList(getCourses), () -> {
 				Set<String> result = getCourses.getResult().get().keySet();
-				if (((CoursePrivateState) state).getAvailableSpots() > 0 && result.containsAll(prequisites)) {
-					System.out.println("Registered " + studentName + " successfully");
+				if (((CoursePrivateState) state).getAvailableSpots() > 0 && result.containsAll(prequisites) && !regStudents.contains(studentName)) {
 					((CoursePrivateState) state).incRegistered();
 					((CoursePrivateState) state).decAvailable();
 					regStudents.add(studentName);
@@ -42,10 +41,11 @@ public class ParticipateInCourse extends Action<Boolean> {
 					sendMessage(addToGradeSheet, studentName, new StudentPrivateState());
 					then(Collections.singletonList(addToGradeSheet), () -> complete(true));
 				} else {
-					System.out.println("Registered " + studentName + " unsuccessfully");
 					complete(false);
 				}
 			});
+		} else {
+			complete(false);
 		}
 	}
 }

@@ -40,16 +40,15 @@ public abstract class Action<R> {
 	 * the same package can access it - you should *not* change it to
 	 * public/private/protected
 	 */
-	/*package*/	final void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
-		System.out.println("#### " + actorId + ": " + actionName + ": handle()");
+	/*package*/
+	final void handle(ActorThreadPool pool, String actorId, PrivateState actorState) {
 		threadPool = pool;
 		state = actorState;
 		this.actorId = actorId;
 		if (continuation == null) {
+			// First time this action is being handled
 			start();
 		} else {
-			// All required action have been executed
-			System.out.println("Initiate continuation of " + actorId + ": " + actionName + " in " + actorId);
 			continuation.call();
 		}
 	}
@@ -65,10 +64,11 @@ public abstract class Action<R> {
 	 * @param callback the callback to execute once all the results are resolved
 	 */
 	protected final void then(Collection<? extends Action<?>> actions, callback callback) {
-		System.out.println("#### " + actorId + ": " + actionName + ": then()");
 		continuation = callback;
 		if (actions.size() == 0)
 			sendMessage(this, actorId, state);
+		// Subscribing to each action a callback that increments the completedActions counter.
+		// The last callback to increment will return this action to its original queue
 		for (Action action : actions) {
 			action.promise.subscribe(() -> {
 				if (completedActions.incrementAndGet() == actions.size()) {
@@ -108,7 +108,6 @@ public abstract class Action<R> {
 	 * @return promise that will hold the result of the sent action
 	 */
 	public Promise<?> sendMessage(Action<?> action, String actorId, PrivateState actorState) {
-		System.out.println("#### " + actorId + ": " + actionName + ": sendMessage()");
 		threadPool.submit(action, actorId, actorState);
 		return action.getResult();
 	}
